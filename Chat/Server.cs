@@ -1,6 +1,5 @@
 ﻿using HW1.Models;
 using HW1.Extensions;
-using System.Net;
 using System.Net.Sockets;
 using HW1.Infrastructure;
 
@@ -18,7 +17,12 @@ internal class Server(Config config)
         {
             try
             {
-                var response  = await Receive();
+                var (receive, response) = await Receive();
+                if (Command.Exit.Is(receive?.Text))
+                {
+                    Text.Information("The Server shut down.");
+                    return;
+                }
                 await Send(new() { NickName = "Server", Text = response });
             }
             catch (Exception error)
@@ -28,7 +32,7 @@ internal class Server(Config config)
         }
     }
 
-    protected override async Task<string> Receive()
+    protected override async Task<(Message? receive, string response)> Receive()
     {
         using UdpClient receiver = new(_config.Local);
         UdpReceiveResult data = await receiver.ReceiveAsync();     
@@ -37,6 +41,6 @@ internal class Server(Config config)
                 ? $"Message has been received from {receive.NickName}"
                 : $"The server can't make out the message.";
         Text.Information(response);
-        return response;
+        return (receive, response);
     }
 }

@@ -2,8 +2,6 @@
 using HW1.Extensions;
 using System.Net.Sockets;
 using HW1.Infrastructure;
-using System.Net;
-using System.Reflection;
 
 namespace HW1.Chat;
 
@@ -17,7 +15,13 @@ internal class Client(string nickName, Config config) : UdpChat(config)
         {
             try
             {
-                await Send(new() { NickName = nickName, Text = Text.Input() });
+                string input = Text.Input();
+                await Send(new() { NickName = nickName, Text = input });
+                if (Command.Exit.Is(input))
+                {
+                    Text.Information("The client shut down.");
+                    return;
+                }
                 await Receive();
 
             }
