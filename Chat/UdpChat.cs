@@ -7,9 +7,16 @@ namespace HW1.Chat;
 
 internal abstract class UdpChat
 {
-    protected readonly Config _config;
+    protected readonly Configuration _config;
+    protected readonly CancellationTokenSource _cancellationTokenSource;
+    protected readonly CancellationToken _cancellationToken;
 
-    protected UdpChat(Config config)=> _config = config;
+    protected UdpChat(Configuration config)
+    {
+        _config = config;
+        _cancellationTokenSource = new CancellationTokenSource();
+        _cancellationToken = _cancellationTokenSource.Token;
+    }
     
     public abstract Task Start();
     protected abstract Task Receive();
@@ -17,6 +24,8 @@ internal abstract class UdpChat
     protected async Task Send(Message response)
     {
         using UdpClient sender = new();
-        await sender.SendAsync(response.ToBytes(), new IPEndPoint(_config.Address, _config.Remote));
+        await sender.SendAsync(response.ToBytes(), new IPEndPoint(_config.Address, _config.Remote), _cancellationToken);
     }
+
+    protected abstract Task RunConversation();
 }

@@ -21,7 +21,7 @@ internal static class MessageExtension
     public static void Print(this Message message)
     {
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write($"{message.NickName} - ");
+        Console.Write($"{message.Username} - ");
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine($"{message.DateTime.ToShortTimeString()} {message.DateTime.ToShortDateString()}");
         Console.ResetColor();

@@ -2,7 +2,7 @@
 
 namespace HW1.Models;
 
-internal class Config
+internal class Configuration
 {
     public required int Remote { get; set; }
     public required int Local { get; set; }

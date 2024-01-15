@@ -5,29 +5,38 @@ using HW1.Infrastructure;
 
 namespace HW1.Chat;
 
-internal class Client(string nickName, Config config) : UdpChat(config)
+internal class Client(string username, Configuration config) : UdpChat(config)
 {
     public override async Task Start()
     {
-        Text.Information("The client is up.");
+        Log.Information("The client is up.");
+        await RunConversation();
+    }
 
+    protected override async Task RunConversation()
+    {       
         while (true)
         {
             try
             {
-                string input = Text.Input();
-                await Send(new() { NickName = nickName, Text = input });
+                _cancellationToken.ThrowIfCancellationRequested();
+                string input = await UserInput.ConsoleInput(_cancellationToken);
+                await Send(new() { Username = username, Text = input });
                 if (Command.Exit.Is(input))
                 {
-                    Text.Information("The client shut down.");
-                    return;
+                    await _cancellationTokenSource.CancelAsync();
                 }
                 await Receive();
 
             }
+            catch (OperationCanceledException)
+            {
+                Log.Information("The client shut down.");
+                return;
+            }
             catch (Exception error)
             {
-                Text.Error(error.ToString());
+                Log.Error(error.ToString());
             }
         }
     }
@@ -35,7 +44,7 @@ internal class Client(string nickName, Config config) : UdpChat(config)
     protected override async Task Receive()
     {
         using UdpClient receiver = new(_config.Local);
-        UdpReceiveResult data = await receiver.ReceiveAsync();
+        UdpReceiveResult data = await receiver.ReceiveAsync(_cancellationToken);
         Message? receive = data.Buffer.FromBytes();        
         if (receive is not null)
         {
@@ -43,7 +52,7 @@ internal class Client(string nickName, Config config) : UdpChat(config)
         }
         else
         {
-            Text.Error($"The client can't make out the message from server.");
+            Log.Error($"The client can't make out the message from server.");
         }
     }
 }

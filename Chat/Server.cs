@@ -5,29 +5,43 @@ using HW1.Infrastructure;
 
 namespace HW1.Chat;
 
-internal class Server(Config config) 
+internal class Server(Configuration config) 
     : UdpChat(config)
 {
   
     public override async Task Start()
     {
-        Text.Information("The server is running.");
+        Log.Information("The server is running.");
+        Task.Run(() => CancellTask());
+        await RunConversation();
+        
+    }
 
+    private void CancellTask()
+    {
+        if (Console.ReadKey().Key == ConsoleKey.Escape) 
+        {
+            Log.Information("The Server must be shut down.");
+            _cancellationTokenSource.Cancel();
+        }
+    }
+
+    protected override async Task RunConversation()
+    {
         while (true)
         {
             try
             {
                 var (receive, response) = await Receive();
-                if (Command.Exit.Is(receive?.Text))
-                {
-                    Text.Information("The Server shut down.");
-                    return;
-                }
-                await Send(new() { NickName = "Server", Text = response });
+                await Send(new() { Username = "Server", Text = response });
+            }
+            catch (OperationCanceledException)
+            {               
+                return;
             }
             catch (Exception error)
             {
-                Text.Error(error.ToString());
+                Log.Error(error.ToString());
             }
         }
     }
@@ -35,12 +49,12 @@ internal class Server(Config config)
     protected override async Task<(Message? receive, string response)> Receive()
     {
         using UdpClient receiver = new(_config.Local);
-        UdpReceiveResult data = await receiver.ReceiveAsync();     
+        UdpReceiveResult data = await receiver.ReceiveAsync(_cancellationToken);     
         Message? receive = data.Buffer.FromBytes();
         string response = receive is not null
-                ? $"Message has been received from {receive.NickName}"
+                ? $"Message has been received from {receive.Username}"
                 : $"The server can't make out the message.";
-        Text.Information(response);
+        Log.Information(response);
         return (receive, response);
     }
 }
