@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using CommandLine.Text;
 using HW1.Chat;
 using HW1.Models;
 using System.Net;
@@ -7,12 +8,17 @@ namespace HW1;
 
 public class Program
 {
+    private static UdpChat? _chat;
 
-    static void Main(string[] args)
+
+    static async Task Main(string[] args)
     {
         Parser.Default.ParseArguments<Options>(args)
             .WithParsed(RunOptions)
             .WithNotParsed(HandleParseError);
+
+        if (_chat is not null)
+            await _chat.RunAsync();
     }
 
     static void HandleParseError(IEnumerable<Error> errors)
@@ -25,33 +31,29 @@ public class Program
 
     static void RunOptions(Options options)
     {
+        if (options.ShowHelp)
+        {
+            return;
+        }
+
+
         if (options.Mode == OperationMode.Client && string.IsNullOrEmpty(options.Username))
         {
             Console.WriteLine("Username is required for client mode.");
             return;
         }
 
-        IPAddress address = IPAddress.Parse("127.0.0.1");
-        int serverPort = 10000;
-        int clientPort = 12000;
 
-        Task.Run(async () =>
+        switch (options.Mode)
         {
-            switch (options.Mode)
-            {
-                case OperationMode.Server:
-                    UdpChat server = new Server(config: new() { Address = address, Local = serverPort, Remote = clientPort });
-                    await server.Start();
-                    break;
-                case OperationMode.Client:
-                    UdpChat client = new Client(
-                        username: options.Username!,
-                        config: new() { Address = address, Local = clientPort, Remote = serverPort });
-                    await client.Start();
-                    break;
-                default:
-                    break;
-            }
-        }).Wait();
+            case OperationMode.Server:
+                _chat = new Server();
+                break;
+            case OperationMode.Client:
+                _chat = new Client(options.Username!);
+                break;
+            default:
+                break;
+        }
     }
 }
