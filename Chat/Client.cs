@@ -1,24 +1,25 @@
-﻿using HW1.Models;
-using HW1.Extensions;
+﻿using App.Models;
+using App.Extensions;
 using System.Net.Sockets;
-using HW1.Infrastructure;
-using System.Net;
+using App.Infrastructure;
 
-namespace HW1.Chat;
+namespace App.Chat;
 
-internal class Client(string username) : UdpChat
+internal sealed class Client(string username) : UdpChat
 {
     public override async Task RunAsync()
     {
-        Log.Information("The client is up.");
-        await RunConversation();
-    }
-
-    protected async Task RunConversation()
-    {
+        Log.Information(Constants.CLIENT_IS_RUNNING);
         using UdpClient client = new();
         client.Connect(serverIP, serverPort);
-        await SendAsync(client, Message.JoinedClientMessage(username));
+        await RunConversation(client);
+    }
+
+    private async Task RunConversation(UdpClient client)
+    {
+        
+        await SendAsync(client, Messages.Clients.JoinedMessage(username));
+        
         #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         Task.Run(() => ReceiveAsync(client));
         #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
@@ -30,19 +31,20 @@ internal class Client(string username) : UdpChat
             {
                 _cancellationToken.ThrowIfCancellationRequested();
                 string input = await UserInput.ConsoleInput(_cancellationToken);
+
                 if (Command.Exit.Is(input))
                 {
-                    await _cancellationTokenSource.CancelAsync();
-                    await SendAsync(client, Message.QuitClientMessage(username));
+                    await SendAsync(client, Messages.Clients.QuitMessage(username));
+                    _cancellationTokenSource.Cancel();
                 }
                 else 
                 {                
-                    await SendAsync(client, Message.Create(username, input));
+                    await SendAsync(client, Messages.Shared.CommonMessage(username, input));
                 }
             }
             catch (OperationCanceledException)
             {
-                Log.Information("The client shut down.");
+                Log.Information(Constants.CLIENT_STOPPED);
                 return;
             }
             catch (Exception error)
@@ -60,11 +62,20 @@ internal class Client(string username) : UdpChat
             Message? receive = data.Buffer.FromBytes();
             if (receive is not null)
             {
-                receive.Print();
+                if (Command.Exit.Is(receive.Text))
+                {
+                    Log.Information(Constants.SERVER_IS_STOPPED);
+                    Log.Information(Constants.CLIENT_STOPPED);
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    Log.Message(receive);
+                }                              
             }
             else
             {
-                Log.Error($"The client can't make out the message from server.");
+                Log.Error(Constants.CLIENT_CAN_NOT_READ_MESSAGE);
             }
         }
     }

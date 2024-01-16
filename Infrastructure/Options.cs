@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace HW1.Models;
+namespace App.Infrastructure;
 
 internal class Options
 {
@@ -9,14 +9,4 @@ internal class Options
 
     [Option('u', "username", HelpText = "Specify username (required for client mode)")]
     public string? Username { get; set; }
-
-    [Option('h', "help", HelpText = "Display this help")]
-    public bool ShowHelp { get; set; }
-}
-
-
-enum OperationMode
-{
-    Server,
-    Client
 }

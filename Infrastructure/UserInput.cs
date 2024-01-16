@@ -1,21 +1,11 @@
-﻿namespace HW1.Infrastructure;
+﻿using App.Models;
+
+namespace App.Infrastructure;
 
 internal class UserInput
 {
-    public static async Task<string> ConsoleInput(CancellationToken _cancellationToken)
+    public static async Task<string> ConsoleInput(CancellationToken cancellationToken)
     {
-
-		try
-		{
-            _cancellationToken.ThrowIfCancellationRequested();
-            return await Task.Run(() => Console.ReadLine() ?? string.Empty);
-        }
-		catch (OperationCanceledException)
-		{
-
-            Log.Error("Operation was cancelled");
-            throw;
-		}
-        
+        return await Console.In.ReadLineAsync(cancellationToken) ?? Command.Exit.Name;
     }
 }

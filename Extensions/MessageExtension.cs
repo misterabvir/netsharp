@@ -1,8 +1,8 @@
-﻿using HW1.Models;
+﻿using App.Models;
 using System.Text;
 using System.Text.Json;
 
-namespace HW1.Extensions;
+namespace App.Extensions;
 
 internal static class MessageExtension
 {
@@ -17,14 +17,4 @@ internal static class MessageExtension
 
     public static Message? FromBytes(this byte[] bytes)
         => Encoding.UTF8.GetString(bytes).FromJson();
-
-    public static void Print(this Message message)
-    {
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write($"{message.Username} - ");
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($"{message.DateTime.ToShortTimeString()} {message.DateTime.ToShortDateString()}");
-        Console.ResetColor();
-        Console.WriteLine($"{message.Text}");
-    }
 }

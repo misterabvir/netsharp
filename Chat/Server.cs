@@ -1,99 +1,111 @@
-﻿using HW1.Models;
-using HW1.Extensions;
-using System.Net.Sockets;
-using HW1.Infrastructure;
+﻿using App.Extensions;
+using App.Infrastructure;
+using App.Models;
 using System.Net;
+using System.Net.Sockets;
+using static App.Models.Messages;
 
-namespace HW1.Chat;
+namespace App.Chat;
 
-internal class Server : UdpChat
+internal sealed class Server : UdpChat
 {
-    private HashSet<IPEndPoint> _clientEndPoints = [];
+    private Dictionary<string, IPEndPoint> _users = [];
+
 
     public override async Task RunAsync()
     {
-        Log.Information("The server is running.");
-        Task.Run(() => CancellTask());
-        await RunConversation();
+        using UdpClient client = new(serverPort);
+        Log.Information(Constants.SERVER_IS_RUNNING);
+        Task.Run(Quit);
+        await RunConversation(client);
+        client.Close();
+    }
+
+    private async Task Quit()
+    {
+        while (!Command.Exit.Is(await UserInput.ConsoleInput(default))) { }
+        _cancellationTokenSource.Cancel();
         
     }
 
-    private void CancellTask()
-    {
-        if (Console.ReadKey().Key == ConsoleKey.Escape) 
-        {
-            Log.Information("The Server must be shut down.");
-            _cancellationTokenSource.Cancel();
-        }
-    }
 
-    protected async Task RunConversation()
+    private async Task RunConversation(UdpClient client)
     {
-        using UdpClient client = new(serverPort);
+
         while (true)
         {
             try
             {
-                await ReceiveAsync(client);              
+                await ReceiveAsync(client);
             }
             catch (OperationCanceledException)
-            {               
+            {
+                Log.Information(Constants.SERVER_MUST_BE_SHUTDOWN);
+                await SendAllAsync(client, Servers.ShutDown());
                 return;
             }
             catch (Exception error)
             {
-                Log.Error(error.ToString());
+                Log.Error(error.Message.ToString());
             }
         }
     }
 
     protected override async Task ReceiveAsync(UdpClient client)
     {
-        
-        UdpReceiveResult data = await client.ReceiveAsync(_cancellationToken);     
-        Message? receive = data.Buffer.FromBytes();
-        string response = receive is not null
-                ? $"Message has been received from {receive.Username}"
-                : $"The server can't make out the message.";
-        Log.Information(response);
-
-
-        if (receive is not null)
+        UdpReceiveResult data = await client.ReceiveAsync(_cancellationToken);
+        Message? message = data.Buffer.FromBytes();
+        if (message is not null)
         {
-            if (!_clientEndPoints.Contains(data.RemoteEndPoint)
-                && Command.Join.Is(receive.Text))
-            {
-                _clientEndPoints.Add(data.RemoteEndPoint);
-                Log.Information($"{receive.Username} join.");
-                await SendAllAsync(client, Message.JoinedServerMessage(receive.Username));
-            }
-            else if (Command.Exit.Is(receive.Text))
-            {
-                _clientEndPoints.Remove(data.RemoteEndPoint);
-                Log.Information($"{receive.Username} out.");
-                await SendAllAsync(client, Message.QuitServerMessage(receive.Username));
-            }
-            else
-            {
-                await SendAllAsync(client, receive);
-            }       
+            await AcceptMessageHandler(client, message, data.RemoteEndPoint);
         }
         else
         {
-            await SendAsync(client, new Message()
-            {
-                Username = "Server",
-                Text = $"The server can't make out the message."
-            },
-            data.RemoteEndPoint);
-        }      
+            Log.Information(Constants.SERVER_CAN_NOT_READ_MESSAGE);
+            await SendAsync(client, Servers.ErrorReadMessage(), data.RemoteEndPoint);
+        }
+    }
+
+    private async Task AcceptMessageHandler(UdpClient client, Message receive, IPEndPoint endPoint)
+    {
+        Log.Information($"{Constants.USER_RECEIVE_MESSAGE} {receive.Username}");
+        if (Command.ShutDown.Is(receive.Text))
+        {
+            await SendAllAsync(client, Servers.ShutDownMessage(receive.Username));
+            _cancellationTokenSource.Cancel();
+        }
+        else if(Command.Join.Is(receive.Text) && !_users.Values.Contains(endPoint))
+        {
+            _users[receive.Username] = endPoint;
+            Log.Information($"{receive.Username} {Constants.USER_JOINED}");
+            await SendAllAsync(client, Servers.JoinedMessage(receive.Username));
+        }
+        else if (Command.Exit.Is(receive.Text))
+        {
+            _users.Remove(receive.Username);
+            Log.Information($"{receive.Username} {Constants.USER_LEFT}");
+            await SendAllAsync(client, Servers.QuitMessage(receive.Username));
+        }
+        else
+        {
+            await SendAllAsync(client, receive);
+        }
     }
 
     private async Task SendAllAsync(UdpClient client, Message response)
     {
-        foreach (var ep in _clientEndPoints)
+
+        foreach (var user in _users.ToArray())
         {
-            await SendAsync(client, response, ep);
+            try
+            {
+                await SendAsync(client, response, user.Value);
+            }
+            catch (SocketException)
+            {
+                Log.Error($"{user.Key} {Constants.CLIENT_DISCONECTED}");
+                _users.Remove(user.Key);
+            }
         }
     }
 }
