@@ -1,5 +1,4 @@
 ﻿using App.Infrastructure;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace App.Models;
 
@@ -7,65 +6,81 @@ internal static class Messages
 {
     internal static class Clients
     {
-        public static Message JoinedMessage(string username) => new()
+        public static Message JoinedMessage(string sender) => new()
         {
             Text = Command.Join.Name,
-            Username = username,
+            Sender = sender,
+            Recipient = Constants.SERVER_NAME,
             MessageStatus = MessageStatus.System
         };
 
-        public static Message QuitMessage(string username) => new()
+        public static Message QuitMessage(string sender) => new()
         {
             Text = Command.Exit.Name,
-            Username = username,
+            Sender = sender,
+            Recipient = Constants.SERVER_NAME,
             MessageStatus = MessageStatus.System
         };
     }
 
     internal static class Servers
     {
-        public static Message JoinedMessage(string username) => new()
+        public static Message JoinedMessage(string sender) => new()
         {
-            Text = $"{username} {Constants.USER_JOINED}",
-            Username = Constants.SERVER_NAME,
+            Text = $"{sender} {Constants.USER_JOINED}",
+            Sender = Constants.SERVER_NAME,
+            Recipient = string.Empty,
             MessageStatus = MessageStatus.System
         };
 
-        public static Message QuitMessage(string username) => new()
+         public static Message AlreadyJoinedMessage(string recipient) => new()
         {
-            Text = $"{username} {Constants.USER_LEFT}",
-            Username = Constants.SERVER_NAME,
+            Text = $"{recipient} {Constants.USER_ALREADY_JOINED}",
+            Sender = Constants.SERVER_NAME,
+            Recipient = recipient,
+            MessageStatus = MessageStatus.System
+        };
+
+        public static Message QuitMessage(string sender) => new()
+        {
+            Text = $"{sender} {Constants.USER_LEFT}",
+            Sender = Constants.SERVER_NAME,
+            Recipient = string.Empty,
             MessageStatus = MessageStatus.System
         };
 
         public static Message ErrorReadMessage() => new()
         {
             Text = Constants.SERVER_CAN_NOT_READ_MESSAGE,
-            Username = Constants.SERVER_NAME,
+            Sender = Constants.SERVER_NAME,
+            Recipient = string.Empty,
             MessageStatus = MessageStatus.Error
         };
 
         internal static Message ShutDown() => new()
         {
             Text = Command.Exit.Name,
-            Username = Constants.SERVER_NAME,
+            Sender = Constants.SERVER_NAME,
+            Recipient = string.Empty,
             MessageStatus = MessageStatus.System
         };
 
-        internal static Message ShutDownMessage(string username) => new()
+        internal static Message TurnOffServer(string sender) => new()
         {
-            Text = $"{username} {Constants.USER_SHUTDOWN_SERVER}",
-            Username = Constants.SERVER_NAME,
+            Text = $"{sender} {Constants.USER_TURN_OF_SERVER}",
+            Sender = Constants.SERVER_NAME,
+            Recipient = string.Empty,
             MessageStatus = MessageStatus.System
         };
     }
 
     internal static class Shared
     {
-        public static Message CommonMessage(string username, string text) => new()
+        public static Message CommonMessage(string sender, string recipient, string text) => new()
         {
             Text = text,
-            Username = username,
+            Sender = sender,
+            Recipient = recipient,
             MessageStatus = MessageStatus.Common
         };
     }

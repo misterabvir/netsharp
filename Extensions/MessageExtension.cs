@@ -17,4 +17,11 @@ internal static class MessageExtension
 
     public static Message? FromBytes(this byte[] bytes)
         => Encoding.UTF8.GetString(bytes).FromJson();
+
+    public static string FirstWord(this string text)
+    {
+        ReadOnlySpan<char> inputSpan = text.AsSpan();
+        int spaceIndex = inputSpan.IndexOf(' ') == -1 ? text.Length : inputSpan.IndexOf(' ');
+        return text[..spaceIndex];
+    }
 }

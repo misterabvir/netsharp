@@ -4,14 +4,24 @@ namespace App.Infrastructure;
 
 internal static class Log 
 {
+    /// <summary>
+    /// Write in console system messages
+    /// </summary>
+    /// <param name="message"> Message </param>
     public static void Information(string message)
     {
+        Console.ForegroundColor = ConsoleColor.Magenta;
+        Console.Write("Info: ");
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.Write($"{DateTime.Now.ToShortTimeString()} {DateTime.Now.ToShortDateString()} - ");
         Console.ResetColor();
         Console.WriteLine(message);
     }
 
+    /// <summary>
+    /// Write to console error messages
+    /// </summary>
+    /// <param name="message"> Message </param>
     public static void Error(string message)
     {
         Console.ForegroundColor = ConsoleColor.Yellow;
@@ -21,12 +31,16 @@ internal static class Log
         Console.ResetColor();
     }
 
+    /// <summary>
+    /// Write console user messages
+    /// </summary>
+    /// <param name="message"> Message </param>
     public static void Message(Message message)
     {
         ConsoleColor defaultColor = Console.ForegroundColor;
 
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write($"{message.Username} - ");
+        Console.Write($"{message.Sender} - ");
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.Write($"{message.DateTime.ToShortTimeString()} {message.DateTime.ToShortDateString()}");
 

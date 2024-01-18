@@ -2,6 +2,9 @@
 
 namespace App.Infrastructure;
 
+/// <summary>
+/// Command line options fo parse args
+/// </summary>
 internal class Options
 {
     [Option('m', "mode", Required = true, HelpText = "Specify mode of operation: server or client")]

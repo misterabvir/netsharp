@@ -1,4 +1,4 @@
-﻿using App.Chat;
+﻿using App.Core;
 
 UdpChat? _chat = UdpChatFactory.Create(args);
 if (_chat is not null)
