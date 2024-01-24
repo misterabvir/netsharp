@@ -6,22 +6,26 @@ namespace App.Core;
 internal class UdpChatFactory
 {
     private readonly string[] _args;
+    private readonly ILogger _logger;
+    private readonly IInput _input;
     private UdpChat? _chat;
 
-    private UdpChatFactory(string[] args)
+    private UdpChatFactory(string[] args, ILogger logger, IInput input)
     {
         _args = args;
+        _logger = logger;
+        _input = input;
     }
 
-    public static UdpChat Create(string[] args)
+    public static UdpChat Create(string[] args, ILogger logger, IInput input)
     {
-        UdpChatFactory factory = new(args);
+        UdpChatFactory factory = new(args, logger, input);
         return factory.Create();
     }
 
     private UdpChat Create()
     {
-     
+
         Parser.Default
             .ParseArguments<Options>(_args)
             .WithParsed(RunOptions);
@@ -39,8 +43,8 @@ internal class UdpChatFactory
 
         _chat = options.Mode switch
         {
-            OperationMode.Client => new UdpChatClient(options.Username!),
-            OperationMode.Server => new UdpChatServer(),
+            OperationMode.Client => new UdpChatClient(options.Username!, _logger, _input),
+            OperationMode.Server => new UdpChatServer(_logger, _input),
             _ => null
         };
     }

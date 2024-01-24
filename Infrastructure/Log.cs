@@ -2,13 +2,21 @@
 
 namespace App.Infrastructure;
 
-internal static class Log 
+internal interface ILogger
+{
+    void Information(string message);
+    void Error(string message);
+    void Message(Message message);
+}
+
+
+internal class ConsoleLogger : ILogger
 {
     /// <summary>
     /// Write in console system messages
     /// </summary>
     /// <param name="message"> Message </param>
-    public static void Information(string message)
+    public void Information(string message)
     {
         Console.ForegroundColor = ConsoleColor.Magenta;
         Console.Write("Info: ");
@@ -22,8 +30,10 @@ internal static class Log
     /// Write to console error messages
     /// </summary>
     /// <param name="message"> Message </param>
-    public static void Error(string message)
+    public void Error(string message)
     {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Write("Error: ");
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.Write($"{DateTime.Now.ToShortTimeString()} {DateTime.Now.ToShortDateString()} - ");
         Console.ForegroundColor = ConsoleColor.Red;
@@ -35,7 +45,7 @@ internal static class Log
     /// Write console user messages
     /// </summary>
     /// <param name="message"> Message </param>
-    public static void Message(Message message)
+    public void Message(Message message)
     {
         ConsoleColor defaultColor = Console.ForegroundColor;
 
