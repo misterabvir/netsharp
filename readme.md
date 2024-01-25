@@ -22,6 +22,7 @@
 # Урок 5. Базы данных: Entity framework, code first/db first
 Реализуйте тип сообщений List, при котором клиент будет получать все непрочитанные сообщения с сервера.
 
+>ps реализовано с помощью SQLite
 ![screen](./Images/homework5.png)
 
 
