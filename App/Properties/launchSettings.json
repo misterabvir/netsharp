@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    },
+    "Client": {
+      "commandName": "Project",
+      "commandLineArgs": "Alien"
+    },
+    "Server": {
+      "commandName": "Project"
+    }
+  }
+}
