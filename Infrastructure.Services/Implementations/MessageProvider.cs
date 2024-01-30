@@ -1,10 +1,10 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using Contracts.Shared;
-using Core.Abstraction;
-using Core.Abstraction.EventArgs;
+using Infrastructure.Services.Abstractions;
+using Infrastructure.Services.Implementations.EventArgs;
 
-namespace Core.Implementation;
+namespace Infrastructure.Services.Implementations;
 
 public sealed class MessageProvider : IMessageProvider
 {
@@ -22,6 +22,7 @@ public sealed class MessageProvider : IMessageProvider
     public MessageProvider(UdpClient udpClient)
     {
         _udpClient = udpClient;
+        Console.WriteLine(_udpClient.Client.LocalEndPoint);
     }
 
     public async Task SendAsync(Message message, IPEndPoint endPoint, CancellationToken cancellationToken)

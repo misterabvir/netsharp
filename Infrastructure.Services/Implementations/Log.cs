@@ -1,14 +1,7 @@
 ﻿using Contracts.Shared;
+using Infrastructure.Services.Abstractions;
 
-namespace Core.UIWrappers;
-
-public interface ILog
-{
-    void Error(string message, string? stackTrace);
-    void Info(string text);
-    void Info(Message message);
-    void Message(Message message);
-}
+namespace Infrastructure.Services.Implementations;
 
 
 public class Log : ILog

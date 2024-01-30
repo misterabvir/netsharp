@@ -1,6 +1,6 @@
 ﻿using Contracts.Shared;
-using Core.Abstraction.EventArgs;
-using Core.UIWrappers;
+using Infrastructure.Services.Abstractions;
+using Infrastructure.Services.Implementations.EventArgs;
 using System.Net;
 
 namespace Core.Abstraction;
@@ -12,6 +12,8 @@ public abstract class ChatBase
     protected CancellationToken _cancellationToken;
     protected CancellationTokenSource _cancellationTokenSource;
     protected bool _showLogSender = false;
+    protected Dictionary<Command, Func<Message, IPEndPoint, Task>> _handlers = [];
+    
     protected ChatBase(IMessageProvider messageProvider, ILog log)
     {
         _cancellationTokenSource = new();
@@ -25,9 +27,9 @@ public abstract class ChatBase
     }
 
 
-    public virtual async Task StartAsync()
+    public virtual Task StartAsync()
     {
-        await _messageProvider.Listener(_cancellationToken);
+        return _messageProvider.Listener(_cancellationToken);
     }
 
     protected abstract Task OnReceivedMessageHandler(ReceivedMessageArgs args);

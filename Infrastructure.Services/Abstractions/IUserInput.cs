@@ -1,4 +1,4 @@
-﻿namespace Core.UIWrappers;
+﻿namespace Infrastructure.Services.Abstractions;
 
 public interface IUserInput
 {

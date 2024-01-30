@@ -1,4 +1,6 @@
-﻿namespace Core.UIWrappers;
+﻿using Infrastructure.Services.Abstractions;
+
+namespace Infrastructure.Services.Implementations;
 
 public class UserInput : IUserInput
 {

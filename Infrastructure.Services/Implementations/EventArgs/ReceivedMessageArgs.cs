@@ -1,6 +1,6 @@
 ﻿using Contracts.Shared;
 using System.Net;
 
-namespace Core.Abstraction.EventArgs;
+namespace Infrastructure.Services.Implementations.EventArgs;
 
 public record ReceivedMessageArgs(Message Message, IPEndPoint EndPoint);

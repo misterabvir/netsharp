@@ -5,7 +5,7 @@
 {
     None,
     Join,
-    Leave,
+    Exit,
     Users,
     History
 }

@@ -1,8 +1,8 @@
 ﻿using Contracts.Shared;
 using System.Net;
-using static Core.Implementation.MessageProvider;
+using static Infrastructure.Services.Implementations.MessageProvider;
 
-namespace Core.Abstraction;
+namespace Infrastructure.Services.Abstractions;
 
 public interface IMessageProvider
 {
