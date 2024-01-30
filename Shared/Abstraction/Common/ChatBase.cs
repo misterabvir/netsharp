@@ -1,9 +1,9 @@
 ﻿using Contracts.Shared;
-using Infrastructure.Services.Abstractions;
-using Infrastructure.Services.Implementations.EventArgs;
+using Core.Abstraction.Services;
+using Core.Abstraction.Services.Events;
 using System.Net;
 
-namespace Core.Abstraction;
+namespace Core.Abstraction.Common;
 
 public abstract class ChatBase
 {
@@ -13,7 +13,7 @@ public abstract class ChatBase
     protected CancellationTokenSource _cancellationTokenSource;
     protected bool _showLogSender = false;
     protected Dictionary<Command, Func<Message, IPEndPoint, Task>> _handlers = [];
-    
+
     protected ChatBase(IMessageProvider messageProvider, ILog log)
     {
         _cancellationTokenSource = new();
@@ -43,7 +43,7 @@ public abstract class ChatBase
     private async Task OnSendedMessageHandler(SendedMessageArgs args)
     {
         await Task.CompletedTask;
-        if(_showLogSender)
+        if (_showLogSender)
             _log.Info($"Sended {args.CountOfSendedBytes} to {args.EndPoint.Address}:{args.EndPoint.Port}");
     }
 

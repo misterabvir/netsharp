@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.Services.Abstractions;
+﻿namespace Core.Abstraction.Services;
 
 public interface IUserInput
 {

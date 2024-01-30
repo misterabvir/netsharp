@@ -1,30 +1,29 @@
 ﻿using Contracts.Shared;
-using Core.Abstraction;
-using Infrastructure.Services.Abstractions;
-using Infrastructure.Services.Implementations.EventArgs;
+using Core.Abstraction.Common;
+using Core.Abstraction.Services;
+using Core.Abstraction.Services.Events;
 using System.Net;
 
 namespace Core.Implementation;
 
 public sealed partial class ClientChat : ChatBase
 {
+    public static string UserName { get; set; } = "Anonimous#" + Random.Shared.Next(100000, 1000000);
 
-    private readonly IPEndPoint _serverEndPoint;
+
+    private readonly IPEndPoint _serverEndPoint = ServerConfiguration.ServerUrl;
     private readonly IUserInput _input;
     private IEnumerable<User> _users;
     private User _currentUser;
 
     public ClientChat(
-        string username,
         IMessageProvider messageProvider,
-        IPEndPoint endPoint,
         ILog log, 
         IUserInput input)
         : base(messageProvider, log)
     {
         _users = [];
-        _currentUser = new User { Name = username };
-        _serverEndPoint = endPoint;
+        _currentUser = new User { Name = UserName };
         _input = input;
         _handlers.Add(Command.Join, JoinCommandHandler);
         _handlers.Add(Command.Users, UsersCommandHandler);

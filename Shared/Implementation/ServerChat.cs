@@ -1,7 +1,7 @@
 ﻿using Contracts.Shared;
-using Core.Abstraction;
-using Infrastructure.Services.Abstractions;
-using Infrastructure.Services.Implementations.EventArgs;
+using Core.Abstraction.Common;
+using Core.Abstraction.Services;
+using Core.Abstraction.Services.Events;
 using Persistence.Repositories;
 using System.Net;
 

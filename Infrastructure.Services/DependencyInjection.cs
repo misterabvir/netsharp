@@ -1,8 +1,7 @@
-﻿using Infrastructure.Services.Abstractions;
-using Infrastructure.Services.Implementations;
+﻿using Core;
+using Core.Abstraction.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Net;
 using System.Net.Sockets;
 
 namespace Infrastructure.Services;
@@ -10,28 +9,18 @@ namespace Infrastructure.Services;
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureServices(
-        this IServiceCollection services, 
+        this IServiceCollection services,
         IConfiguration configuration,
-        string[] args)
+        ChatMode mode)
     {
+        ServerConfiguration.Host = configuration.GetSection("ServerEndPoint:Host").Value ?? throw new Exception("Not read server host address");
+        ServerConfiguration.Port = int.Parse(configuration.GetSection("ServerEndPoint:Port")?.Value ?? throw new Exception("Not read server port"));
 
         services.AddSingleton<ILog, Log>();
         services.AddSingleton<IUserInput, UserInput>();
-
-        string host = configuration.GetSection("ServerEndPoint:Host").Value ?? throw new Exception();
-        int port = int.Parse(configuration.GetSection("ServerEndPoint:Port")?.Value ?? throw new Exception());
-
-        if (args.Length > 0)
-        {
-            services.AddSingleton<IMessageProvider>(_ => 
-            new MessageProvider(new UdpClient(0)));
-        }
-        else
-        {
-            IPEndPoint ep = new IPEndPoint(IPAddress.Parse(host), port);       
-            services.AddSingleton<IMessageProvider>(_ => 
-            new MessageProvider(new UdpClient(ep)));
-        }
+        services.AddSingleton(o => mode == ChatMode.Client ? new UdpClient(0) : new UdpClient(ServerConfiguration.ServerUrl));
+        services.AddSingleton<IMessageProvider, MessageProvider>();
+        
         return services;
     }
 }

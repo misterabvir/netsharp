@@ -1,11 +1,13 @@
 ﻿using Core;
-using Core.Abstraction;
+using Core.Abstraction.Common;
+using Core.Implementation;
 using Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence;
 
-
+ClientChat.UserName = args.Length > 0 ? args[0] : ClientChat.UserName;
+ChatMode mode = args.Length > 0 ? ChatMode.Client : ChatMode.Server;
 
 var configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
@@ -17,7 +19,7 @@ IServiceCollection services = new ServiceCollection();
 
 services
     .AddPersistence(configuration)
-    .AddInfrastructureServices(configuration, args)
-    .AddCore(configuration, args);
+    .AddInfrastructureServices(configuration, mode)
+    .AddCore(mode);
 
 await services.BuildServiceProvider().GetRequiredService<ChatBase>().StartAsync();

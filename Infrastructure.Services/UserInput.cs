@@ -1,6 +1,8 @@
-﻿using Infrastructure.Services.Abstractions;
+﻿
 
-namespace Infrastructure.Services.Implementations;
+using Core.Abstraction.Services;
+
+namespace Infrastructure.Services;
 
 public class UserInput : IUserInput
 {

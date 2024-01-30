@@ -1,19 +1,15 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using Contracts.Shared;
-using Infrastructure.Services.Abstractions;
-using Infrastructure.Services.Implementations.EventArgs;
+using Core.Abstraction.Services;
+using Core.Abstraction.Services.Events;
+using static Core.Abstraction.Services.IMessageProvider;
 
-namespace Infrastructure.Services.Implementations;
+namespace Infrastructure.Services;
 
 public sealed class MessageProvider : IMessageProvider
 {
-
     private readonly UdpClient _udpClient;
-
-    public delegate Task ReceivedMessage(ReceivedMessageArgs args);
-    public delegate Task SendedMessage(SendedMessageArgs args);
-    public delegate Task ErrorExcept(ErrorExceptArgs args);
 
     public event ReceivedMessage? OnReceivedMessage;
     public event ErrorExcept? OnErrorExcept;
@@ -22,7 +18,7 @@ public sealed class MessageProvider : IMessageProvider
     public MessageProvider(UdpClient udpClient)
     {
         _udpClient = udpClient;
-        Console.WriteLine(_udpClient.Client.LocalEndPoint);
+        Console.WriteLine(udpClient.Client.LocalEndPoint);
     }
 
     public async Task SendAsync(Message message, IPEndPoint endPoint, CancellationToken cancellationToken)

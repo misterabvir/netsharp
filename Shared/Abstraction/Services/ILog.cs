@@ -1,6 +1,6 @@
 ﻿using Contracts.Shared;
 
-namespace Infrastructure.Services.Abstractions;
+namespace Core.Abstraction.Services;
 
 public interface ILog
 {

@@ -1,7 +1,7 @@
 ﻿using Contracts.Shared;
-using Infrastructure.Services.Abstractions;
+using Core.Abstraction.Services;
 
-namespace Infrastructure.Services.Implementations;
+namespace Infrastructure.Services;
 
 
 public class Log : ILog

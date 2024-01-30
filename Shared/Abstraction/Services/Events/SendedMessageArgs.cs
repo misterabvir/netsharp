@@ -1,5 +1,5 @@
 ﻿using System.Net;
 
-namespace Infrastructure.Services.Implementations.EventArgs;
+namespace Core.Abstraction.Services.Events;
 
 public record SendedMessageArgs(int CountOfSendedBytes, IPEndPoint EndPoint);
